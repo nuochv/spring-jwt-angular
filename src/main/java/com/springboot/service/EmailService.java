@@ -1,0 +1,60 @@
+package com.springboot.service;
+
+import com.sun.mail.smtp.SMTPTransport;
+import org.springframework.stereotype.Service;
+
+import javax.mail.*;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import java.util.Date;
+import java.util.Properties;
+
+import static com.springboot.constant.EmailConstant.*;
+import static javax.mail.Message.RecipientType.*;
+
+@Service
+public class EmailService {
+
+    public void createNewPasswordEmail(String firstName, String password, String email){
+        Message message = createEmail(firstName, password, email);
+        try {
+            SMTPTransport smtpTransport = (SMTPTransport) getEmailSession().getTransport(SIMPLE_EMAIL_TRANSFER_PROTOCOL);
+            smtpTransport.connect(GMAIL_SMTP_SERVER, USERNAME, PASSWORD);
+            smtpTransport.sendMessage(message, message.getAllRecipients());
+            smtpTransport.close();
+        } catch (SendFailedException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchProviderException e) {
+            throw new RuntimeException(e);
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Message createEmail(String firstName, String password, String email) {
+        Message message = new MimeMessage(getEmailSession());
+        try {
+            message.setFrom(new InternetAddress(FROM_EMAIL));
+            message.setRecipients(TO, InternetAddress.parse(email, false));
+            message.setRecipients(CC, InternetAddress.parse(CC_EMAIL, false));
+            message.setSubject(EMAIL_SUBJECT);
+            message.setText("Hello " + firstName + ", \n \n Your new account password is: " + password + " \n \n The Support Team");
+            message.setSentDate(new Date());
+            message.saveChanges();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return message;
+    }
+
+    private Session getEmailSession() {
+        Properties properties = System.getProperties();
+        properties.put(SMTP_HOST, GMAIL_SMTP_SERVER);
+        properties.put(SMTP_AUTH, true);
+        properties.put(SMTP_POST, DEFAULT_PORT);
+        properties.put(SMTP_STARTTLS_ENABLE, true);
+        properties.put(SMTP_STARTTLS_REQUIRED, true);
+        return Session.getInstance(properties, null);
+    }
+}
