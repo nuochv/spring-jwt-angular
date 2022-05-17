@@ -103,10 +103,10 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{username}")
     @PreAuthorize("hasAuthority('user:delete')")
-    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("id") long id) {
-        userService.deleteUser(id);
+    public ResponseEntity<HttpResponse> deleteUser(@PathVariable("username") String username) throws IOException {
+        userService.deleteUser(username);
         return response(OK, USER_DELETED_SUCCESSFULLY);
     }
 

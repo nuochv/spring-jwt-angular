@@ -13,6 +13,7 @@ import com.springboot.service.LoginAttemptService;
 import com.springboot.service.UserService;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,14 +26,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import javax.annotation.Resource;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 import static com.springboot.constant.FileConstant.*;
 import static com.springboot.constant.UserImplConstant.*;
@@ -215,8 +215,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void deleteUser(Long id) {
-        userRepository.deleteById(id);
+    public void deleteUser(String username) throws IOException {
+        User user = userRepository.findByUsername(username);
+        Path userFolder = Paths.get(USER_FOLDER + user.getUsername()).toAbsolutePath().normalize();
+        FileUtils.deleteDirectory(new File(userFolder.toString()));
+        userRepository.deleteById(user.getId());
     }
 
     @Override
@@ -236,7 +239,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.findAll();
     }
     private String getTemporaryProfileImageUrl(String username) {
-        return ServletUriComponentsBuilder.fromCurrentContextPath().path("DEFAULT_USER_IMAGE_PATH" + username).toUriString();
+        return ServletUriComponentsBuilder.fromCurrentContextPath().path(DEFAULT_USER_IMAGE_PATH + username).toUriString();
     }
     private String setProfileImageUrl(String username) {
         return ServletUriComponentsBuilder.fromCurrentContextPath().path(USER_IMAGE_PATH + username + FORWARD_SLASH

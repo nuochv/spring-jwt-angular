@@ -115,7 +115,7 @@ public class ExceptionHandling  implements ErrorController {
 
     private ResponseEntity<HttpResponse> createHttpResponse(HttpStatus httpStatus, String message) {
         return new ResponseEntity<>(new HttpResponse(httpStatus.value(), httpStatus,
-                httpStatus.getReasonPhrase().toUpperCase(), message.toUpperCase()), httpStatus);
+                httpStatus.getReasonPhrase().toUpperCase(), message), httpStatus);
     }
 
     @RequestMapping(ERROR_PATH)

@@ -13,7 +13,7 @@ import java.util.List;
 public interface UserService {
     User findByUsername(String username);
     User findByEmail(String email);
-    void deleteUser(Long id);
+    void deleteUser(String username) throws IOException;
 
     void resetPassword(String email) throws EmailNotFoundException;
 
